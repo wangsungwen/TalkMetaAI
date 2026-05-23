@@ -375,8 +375,8 @@ const TalkingHead: React.FC<TalkingHeadProps> = ({
 
   const loadAvatar = async (gender: string = 'F') => {
     const avatarUrls = {
-      F: 'https://models.readyplayer.me/64bfa15f0e72c63d7c3934a6.glb?morphTargets=ARKit,Oculus+Visemes,mouthOpen,mouthSmile,eyesClosed,eyesLookUp,eyesLookDown&textureSizeLimit=1024&textureFormat=png',
-      M: 'https://models.readyplayer.me/638df5d0d72bffc6fa179441.glb'
+      F: '/avatars/brunette.glb', // or another local file if you have one (ready-player me is officially shut down)
+      M: '/avatars/brunette.glb'
     };
 
     try {
