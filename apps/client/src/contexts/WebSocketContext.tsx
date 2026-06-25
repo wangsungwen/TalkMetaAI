@@ -29,6 +29,7 @@ interface WebSocketMessage {
 }
 
 interface WebSocketContextType {
+  socket: WebSocket | null; // 💡 確保型別定義存在
   isConnected: boolean;
   isConnecting: boolean;
   connect: () => Promise<void>;
@@ -53,6 +54,7 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
+// 💡 為了相容原本的專案程式碼，保留 useWebSocketContext 命名
 export const useWebSocketContext = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
@@ -73,17 +75,18 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   serverUrl = 'ws://localhost:8000/ws/test-client'
 }) => {
   const wsRef = useRef<WebSocket | null>(null);
+  const [socket, setSocket] = useState<WebSocket | null>(null); // 💡 加增狀態管理 socket 變數
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
   // Callback refs
   const audioReceivedCallbackRef = useRef<
     | ((
-        audioData: string,
-        timingData?: any,
-        sampleRate?: number,
-        method?: string
-      ) => void)
+      audioData: string,
+      timingData?: any,
+      sampleRate?: number,
+      method?: string
+    ) => void)
     | null
   >(null);
   const interruptCallbackRef = useRef<(() => void) | null>(null);
@@ -99,16 +102,27 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       setIsConnecting(true);
       statusChangeCallbackRef.current?.('connecting');
 
-      wsRef.current = new WebSocket(serverUrl);
+      // 💡 行動端自適應：如果傳入的是預設的 localhost，但實際上網頁是用外部 IP 或 ngrok 開啟，自動動態轉換協議網址
+      let finalUrl = serverUrl;
+      if (typeof window !== 'undefined' && (serverUrl.includes('localhost') || serverUrl.includes('127.0.0.1'))) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host;
+        finalUrl = `${protocol}//${host}/ws/test-client`;
+      }
 
-      wsRef.current.onopen = () => {
+      console.log(`🔌 Connecting to WebSocket: ${finalUrl}`);
+      const ws = new WebSocket(finalUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
         setIsConnected(true);
         setIsConnecting(false);
+        setSocket(ws); // 💡 成功連線時將實體傳給 React 狀態
         statusChangeCallbackRef.current?.('connected');
-        console.log('WebSocket connected');
+        console.log('WebSocket connected successfully');
       };
 
-      wsRef.current.onmessage = (event) => {
+      ws.onmessage = (event) => {
         try {
           const data: WebSocketMessage = JSON.parse(event.data);
           console.log('WebSocket message received:', data);
@@ -121,11 +135,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
             console.log('Received interrupt signal');
             interruptCallbackRef.current?.();
           } else if (data.audio) {
-            // Handle audio with native timing
             let timingData = null;
 
             if (data.word_timings) {
-              // Convert to TalkingHead format
+              // 轉為 TalkingHead 標準發音對嘴嘴型格式
               timingData = {
                 words: data.word_timings.map((wt) => wt.word),
                 word_times: data.word_timings.map((wt) => wt.start_time),
@@ -135,13 +148,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
               };
               console.log('Converted timing data:', timingData);
             }
-
-            console.log('Calling audioReceivedCallback with:', {
-              audioLength: data.audio.length,
-              timingData,
-              sampleRate: data.sample_rate || 24000,
-              method: data.method || 'unknown'
-            });
 
             audioReceivedCallbackRef.current?.(
               data.audio,
@@ -154,21 +160,22 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
           } else if (data.error) {
             errorCallbackRef.current?.(data.error);
           } else if (data.type === 'ping') {
-            // Keepalive ping - no action needed
+            // Keepalive 保活
           }
         } catch (e) {
           console.log('Non-JSON message:', event.data);
         }
       };
 
-      wsRef.current.onerror = (error) => {
+      ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         errorCallbackRef.current?.('WebSocket connection error');
       };
 
-      wsRef.current.onclose = () => {
+      ws.onclose = () => {
         setIsConnected(false);
         setIsConnecting(false);
+        setSocket(null); // 清空
         statusChangeCallbackRef.current?.('disconnected');
         console.log('WebSocket disconnected');
       };
@@ -182,12 +189,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
+      setSocket(null);
     }
   }, []);
 
   const sendAudioSegment = useCallback((audioData: ArrayBuffer) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      // Convert ArrayBuffer to base64
       const bytes = new Uint8Array(audioData);
       let binary = '';
       for (let i = 0; i < bytes.byteLength; i++) {
@@ -200,14 +207,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       };
 
       wsRef.current.send(JSON.stringify(message));
-      console.log(`Sent audio segment: ${audioData.byteLength} bytes`);
     }
   }, []);
 
   const sendImage = useCallback((imageData: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       const message = {
-        image: imageData
+        type: 'image_update', // 💡 對齊單元二後端微調規格
+        image: imageData,
+        filename: 'webcam_frame.jpg'
       };
 
       wsRef.current.send(JSON.stringify(message));
@@ -218,7 +226,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const sendAudioWithImage = useCallback(
     (audioData: ArrayBuffer, imageData: string) => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        // Convert ArrayBuffer to base64
         const bytes = new Uint8Array(audioData);
         let binary = '';
         for (let i = 0; i < bytes.byteLength; i++) {
@@ -238,7 +245,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     []
   );
 
-  // Callback registration methods
   const onAudioReceived = useCallback(
     (
       callback: (
@@ -270,7 +276,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     []
   );
 
+  // 💡 關鍵型別修正：將 socket 補進 value 物件中傳遞！
   const value: WebSocketContextType = {
+    socket,
     isConnected,
     isConnecting,
     connect,
@@ -289,4 +297,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       {children}
     </WebSocketContext.Provider>
   );
+};
+
+// 💡 完美對齊 AvatarSelector.tsx 調用名稱，導出 useWebSocket Hook
+export const useWebSocket = () => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocket must be used within a WebSocketProvider');
+  }
+  return context;
 };

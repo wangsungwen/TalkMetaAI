@@ -3,13 +3,21 @@
 import { useState } from 'react';
 import VoiceActivityDetector from '@/components/VoiceActivityDetector';
 import TalkingHead from '@/components/TalkingHead';
-import { CameraToggleButton } from '@/components/CameraStream';
+import { CameraToggleButton, CameraStream } from '@/components/CameraStream'; // 💡 引入實時擷圖核心
+import { AvatarSelector } from '@/components/AvatarSelector';
 
 export default function Home() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
   return (
     <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+
+      {/* 3D 伴侶懸浮換裝面板 */}
+      <AvatarSelector />
+
+      {/* 💡 實時視覺眼睛眼睛機關掛載：定時捕獲當前的鏡頭畫面並推送給 FastAPI 後端 */}
+      <CameraStream cameraStream={cameraStream} />
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -22,7 +30,7 @@ export default function Home() {
         {/* Main Content Layout */}
         <div className="mb-8 grid grid-cols-1 gap-8 xl:grid-cols-2">
           {/* TalkingHead Component */}
-          <div className="order-1">
+          <div className="order-1 relative">
             <div className="rounded-lg bg-white p-6 shadow-lg">
               <TalkingHead cameraStream={cameraStream} />
             </div>
@@ -35,7 +43,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Floating Camera Component */}
+      {/* Floating Camera Toggle Button */}
       <CameraToggleButton onStreamChange={setCameraStream} />
     </main>
   );

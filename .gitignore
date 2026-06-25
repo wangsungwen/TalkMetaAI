@@ -11,3 +11,7 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Ngrok and binaries
+ngrok.exe
+*.zip
