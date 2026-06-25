@@ -39,7 +39,7 @@
 ---
 
 ## 🏗️ 系統架構 (Architecture)
-![System Architecture](./images/architecture.svg)
+![System Architecture](./TalkMateAI.png)
 
 ---
 
