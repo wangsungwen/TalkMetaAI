@@ -1,0 +1,318 @@
+<svg viewBox="0 0 1400 900" width="2800" height="1800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">前端與後端系統架構圖</title>
+  <desc id="desc">Next.js 前端、FastAPI 與 WebSocket 後端，包含 Whisper、SmolVLM2、Kokoro TTS 等模組的資料流架構。</desc>
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <!-- Removed title for cleaner look -->
+  
+  <!-- Frontend Section -->
+  <g>
+    <!-- Frontend Container -->
+    <rect x="50" y="50" width="600" height="320" fill="#e0f2fe" stroke="#0369a1" stroke-width="2" rx="10"/>
+    <text x="350" y="75" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="16" font-weight="bold" fill="#0369a1">
+      前端（Next.js）
+    </text>
+    
+    <!-- 相機串流 -->
+    <rect x="70" y="90" width="140" height="80" fill="#ffffff" stroke="#0369a1" stroke-width="1" rx="5"/>
+    <text x="140" y="110" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#0369a1">
+      相機串流
+    </text>
+    <text x="140" y="125" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      MediaStream API
+    </text>
+    <text x="140" y="140" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      影像擷取
+    </text>
+    <text x="140" y="155" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      320x240 JPEG
+    </text>
+    
+    <!-- 語音活動偵測 -->
+    <rect x="230" y="90" width="160" height="80" fill="#ffffff" stroke="#0369a1" stroke-width="1" rx="5"/>
+    <text x="310" y="110" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#0369a1">
+      語音活動偵測
+    </text>
+    <text x="310" y="125" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      能量閾值濾波
+    </text>
+    <text x="310" y="140" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      AudioWorklet 處理
+    </text>
+    <text x="310" y="155" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      16kHz PCM 音訊
+    </text>
+    
+    <!-- TalkingHead 虛擬頭像 -->
+    <rect x="410" y="90" width="140" height="80" fill="#ffffff" stroke="#0369a1" stroke-width="1" rx="5"/>
+    <text x="480" y="110" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#0369a1">
+      TalkingHead 虛擬頭像
+    </text>
+    <text x="480" y="125" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      3D 頭像渲染
+    </text>
+    <text x="480" y="140" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      唇形同步＋時序
+    </text>
+    <text x="480" y="155" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      ReadyPlayer.me
+    </text>
+    
+    <!-- WebSocket 管理器 -->
+    <rect x="160" y="190" width="280" height="80" fill="#ddd6fe" stroke="#7c3aed" stroke-width="2" rx="5"/>
+    <text x="300" y="210" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#7c3aed">
+      WebSocket 管理器
+    </text>
+    <text x="300" y="225" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      音訊＋影像傳輸
+    </text>
+    <text x="300" y="240" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      中斷處理
+    </text>
+    <text x="300" y="255" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      Base64 音訊＋原生時序
+    </text>
+    
+    <!-- Processing Logic -->
+    <rect x="70" y="290" width="480" height="60" fill="#f3f4f6" stroke="#6b7280" stroke-width="1" rx="5"/>
+    <text x="310" y="310" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">
+      前端處理流程
+    </text>
+    <text x="310" y="325" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#6b7280">
+      Energy Level Check → Audio Buffering → 影像擷取 (if camera active) → WebSocket Send
+    </text>
+    <text x="310" y="340" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      接收音訊 → 時序轉換 → 以原生唇形同步播放 TalkingHead
+    </text>
+  </g>
+  
+  <!-- Backend Section -->
+  <g>
+    <!-- Backend Container -->
+    <rect x="750" y="50" width="600" height="800" fill="#fef3c7" stroke="#d97706" stroke-width="2" rx="10"/>
+    <text x="1050" y="75" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="16" font-weight="bold" fill="#d97706">
+      後端（FastAPI + WebSocket）
+    </text>
+    
+    <!-- WebSocket 伺服器 -->
+    <rect x="780" y="90" width="180" height="60" fill="#ffffff" stroke="#d97706" stroke-width="1" rx="5"/>
+    <text x="870" y="110" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#d97706">
+      WebSocket 伺服器
+    </text>
+    <text x="870" y="125" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      連線管理
+    </text>
+    <text x="870" y="140" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      音訊／影像接收
+    </text>
+    
+    <!-- 後端處理流程 -->
+    <rect x="780" y="460" width="540" height="40" fill="#f3f4f6" stroke="#6b7280" stroke-width="1" rx="5"/>
+    <text x="1050" y="475" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="11" font-weight="bold" fill="#374151">
+      後端處理流程
+    </text>
+    <text x="1050" y="490" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      音訊 → Whisper → 文字＋影像 → SmolVLM2 → 生成器 → Kokoro TTS → WebSocket 回應
+    </text>
+    
+    <!-- Whisper STT -->
+    <rect x="780" y="260" width="160" height="80" fill="#dcfce7" stroke="#16a34a" stroke-width="1" rx="5"/>
+    <text x="860" y="280" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#16a34a">
+      Whisper STT
+    </text>
+    <text x="860" y="295" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      openai/whisper-tiny
+    </text>
+    <text x="860" y="310" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      音訊 → 文字
+    </text>
+    <text x="860" y="325" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      噪音偵測
+    </text>
+    
+    <!-- SmolVLM2 -->
+    <rect x="960" y="260" width="160" height="80" fill="#fce7f3" stroke="#ec4899" stroke-width="1" rx="5"/>
+    <text x="1040" y="280" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#ec4899">
+      SmolVLM2
+    </text>
+    <text x="1040" y="295" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      256M-Video-Instruct
+    </text>
+    <text x="1040" y="310" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      文字＋影像 → 回應
+    </text>
+    <text x="1040" y="325" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      Flash Attention 2
+    </text>
+    
+    <!-- Generator Streaming -->
+    <rect x="1140" y="260" width="160" height="80" fill="#e0e7ff" stroke="#6366f1" stroke-width="1" rx="5"/>
+    <text x="1220" y="280" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#6366f1">
+      文字生成器
+    </text>
+    <text x="1220" y="295" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      TextIteratorStreamer
+    </text>
+    <text x="1220" y="310" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      串流回應
+    </text>
+    <text x="1220" y="325" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      句子分段
+    </text>
+    
+    <!-- Kokoro TTS -->
+    <rect x="780" y="360" width="160" height="80" fill="#fed7e2" stroke="#db2777" stroke-width="1" rx="5"/>
+    <text x="860" y="380" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#db2777">
+      Kokoro TTS
+    </text>
+    <text x="860" y="395" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      原生時序</text>
+    <text x="860" y="410" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      24kHz 音訊
+    </text>
+    <text x="860" y="425" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      詞級同步
+    </text>
+    
+    <!-- 音訊佇列 Manager -->
+    <rect x="960" y="360" width="160" height="80" fill="#fef3c7" stroke="#f59e0b" stroke-width="1" rx="5"/>
+    <text x="1040" y="380" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#f59e0b">
+      音訊佇列
+    </text>
+    <text x="1040" y="395" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      順序播放
+    </text>
+    <text x="1040" y="410" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      中斷處理
+    </text>
+    <text x="1040" y="425" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      Base64 編碼
+    </text>
+    
+    <!-- 影像管理器 -->
+    <rect x="1140" y="360" width="160" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="1" rx="5"/>
+    <text x="1220" y="380" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#6b7280">
+      影像管理器
+    </text>
+    <text x="1220" y="395" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      影像快取
+    </text>
+    <text x="1220" y="410" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      驗證
+    </text>
+    <text x="1220" y="425" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      儲存
+    </text>
+    
+    <!-- Models Section -->
+    <rect x="780" y="520" width="540" height="120" fill="#f9fafb" stroke="#9ca3af" stroke-width="1" rx="5"/>
+    <text x="1050" y="540" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#374151">
+      AI 模型（GPU 加速）
+    </text>
+    
+    <!-- Model Details -->
+    <rect x="800" y="560" width="150" height="60" fill="#ffffff" stroke="#9ca3af" stroke-width="1" rx="3"/>
+    <text x="875" y="580" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" font-weight="bold" fill="#374151">
+      Whisper（tiny）
+    </text>
+    <text x="875" y="595" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      CUDA/CPU
+    </text>
+    <text x="875" y="610" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      流程快取
+    </text>
+    
+    <rect x="970" y="560" width="150" height="60" fill="#ffffff" stroke="#9ca3af" stroke-width="1" rx="3"/>
+    <text x="1045" y="580" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" font-weight="bold" fill="#374151">
+      SmolVLM2-256M
+    </text>
+    <text x="1045" y="595" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      bfloat16
+    </text>
+    <text x="1045" y="610" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      Flash Attention 2
+    </text>
+    
+    <rect x="1140" y="560" width="150" height="60" fill="#ffffff" stroke="#9ca3af" stroke-width="1" rx="3"/>
+    <text x="1215" y="580" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" font-weight="bold" fill="#374151">
+      Kokoro TTS
+    </text>
+    <text x="1215" y="595" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      24kHz 輸出
+    </text>
+    <text x="1215" y="610" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="9" fill="#6b7280">
+      原生時序
+    </text>
+    
+    <!-- 連線管理模組 -->
+    <rect x="780" y="660" width="540" height="60" fill="#f1f5f9" stroke="#64748b" stroke-width="1" rx="5"/>
+    <text x="1050" y="680" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="12" font-weight="bold" fill="#64748b">
+      連線管理模組
+    </text>
+    <text x="1050" y="695" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      多客戶端支援 • 任務取消 • 統計資訊 • 保活機制
+    </text>
+    <text x="1050" y="710" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      記憶體管理 • 錯誤處理 • 非同步任務管理
+    </text>
+    
+    <!-- 效能優化 -->
+    <rect x="780" y="740" width="540" height="60" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="5"/>
+    <text x="1050" y="760" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="11" font-weight="bold" fill="#10b981">
+      效能優化
+    </text>
+    <text x="1050" y="775" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      Image Resizing (75%) • Audio Buffer Management • Async Processing • 句子分段
+    </text>
+    <text x="1050" y="790" text-anchor="middle" font-family="Noto Sans CJK TC, Microsoft JhengHei, PingFang TC, Arial, sans-serif" font-size="10" fill="#475569">
+      Parallel TTS • 原生時序 • GPU Acceleration • Memory Efficient Streaming
+    </text>
+  </g>
+  
+  <!-- Data Flow Arrows -->
+  <!-- Frontend to Backend -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+  
+  <!-- Main bidirectional WebSocket connection -->
+  <line x1="440" y1="230" x2="780" y2="120" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <line x1="780" y1="140" x2="440" y2="250" stroke="#dc2626" stroke-width="3" marker-end="url(#arrowhead-red)"/>
+  
+  <!-- Processing flow arrows - Center to Center -->
+  <!-- WebSocket to Whisper -->
+  <line x1="860" y1="150" x2="860" y2="260" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  
+  <!-- Whisper to SmolVLM2 -->
+  <line x1="940" y1="300" x2="960" y2="300" stroke="#ec4899" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- SmolVLM2 to Generator -->
+  <line x1="1120" y1="300" x2="1140" y2="300" stroke="#6366f1" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Generator to 影像管理器 -->
+  <line x1="1220" y1="340" x2="1220" y2="360" stroke="#6366f1" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 影像管理器 to 音訊佇列 -->
+  <line x1="1140" y1="400" x2="1120" y2="400" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 音訊佇列 to Kokoro -->
+  <line x1="960" y1="400" x2="940" y2="400" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Kokoro to WebSocket (going around Whisper) -->
+  <path d="M 780 400 L 760 400 L 760 180 L 820 180 L 820 150" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrowhead-red)"/>
+  <!-- Legend -->
+  <!-- Removed Key Features section for cleaner look -->
+</svg>
