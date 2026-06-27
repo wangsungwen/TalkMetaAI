@@ -130,15 +130,33 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 ### 步驟：
 1. 下載並解壓 [ngrok](https://ngrok.com/)。
-2. 綁定您的 Authtoken 密鑰：
+   選項 1：通過 WinGet 安裝（推薦）
+   ```powershell
+   winget install ngrok.ngrok
+   ```
+   選項 2：通過 PowerShell 腳本手動安裝
+   ```powershell
+   # 1. Download the official stable zip file
+   Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -  OutFile "ngrok.zip"
+
+   # 2. Extract it to your Program Files
+   Expand-Archive -Path "ngrok.zip" -DestinationPath "$env:ProgramFiles\ngrok" -Force
+
+   # 3. Add ngrok to your system environment variables permanently
+   [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path",     [EnvironmentVariableTarget]::Machine) + ";$env:ProgramFiles\ngrok", [EnvironmentVariableTarget]::Machine)
+
+   # 4. Clean up the zip file
+   Remove-Item "ngrok.zip"
+   ```
+3. 綁定您的 Authtoken 密鑰：
    ```powershell
    ./ngrok config add-authtoken <YOUR_AUTHTOKEN>
    ```
-3. 對 Port 8000 進行公網穿透：
+4. 對 Port 8000 進行公網穿透：
    ```powershell
    ./ngrok http 8000
    ```
-4. 掃描或輸入 ngrok 產生的 `https://xxxx.ngrok-free.app` 專屬網址即可連線，自動取得相機與麥克風權限！
+5. 掃描或輸入 ngrok 產生的 `https://xxxx.ngrok-free.app` 專屬網址即可連線，自動取得相機與麥克風權限！
 
 ---
 
