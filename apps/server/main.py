@@ -31,6 +31,7 @@ def is_lightweight_mode() -> bool:
     return False
 
 LIGHTWEIGHT_MODE = is_lightweight_mode()
+MODEL_PRELOAD_TASK: Optional[asyncio.Task] = None
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
@@ -290,14 +291,23 @@ class ConnectionManager:
 manager = ConnectionManager()
 avatar_mgr = AvatarManager()
 
+def preload_all_models():
+    WhisperProcessor.get_instance()
+    QwenLLMProcessor.get_instance()
+    KokoroTTSProcessor.get_instance()
+
+async def preload_all_models_background():
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, preload_all_models)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global MODEL_PRELOAD_TASK
     if LIGHTWEIGHT_MODE:
         logger.info("TalkMetaAI lightweight mode enabled; skipping AI model preload.")
     else:
-        WhisperProcessor.get_instance()
-        QwenLLMProcessor.get_instance()
-        KokoroTTSProcessor.get_instance()
+        logger.info("Starting TalkMetaAI model preload in the background.")
+        MODEL_PRELOAD_TASK = asyncio.create_task(preload_all_models_background())
     yield
 
 app = FastAPI(title="TalkMateAI Unified GPU Mandarin Server", version="1.0.0", lifespan=lifespan)
@@ -368,6 +378,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         finally:
             manager.disconnect(client_id)
         return
+
+    if MODEL_PRELOAD_TASK is not None and not MODEL_PRELOAD_TASK.done():
+        await websocket.send_text(json.dumps({
+            "type": "status",
+            "message": "AI models are still loading. Please wait..."
+        }))
+        await MODEL_PRELOAD_TASK
 
     whisper_processor = WhisperProcessor.get_instance()
     qwen_processor = QwenLLMProcessor.get_instance()
