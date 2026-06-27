@@ -51,9 +51,14 @@ RUN pip install --upgrade pip \
         "scipy==1.15.2" \
         "backoff==2.2.1" \
         "peft==0.13.2" \
+        "cn2an" \
+        "g2pM" \
+        "jieba" \
         kokoro \
         numpy \
+        "ordered-set" \
         packaging \
+        pypinyin \
         requests \
         websockets \
         wheel
