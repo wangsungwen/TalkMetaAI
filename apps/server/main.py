@@ -276,6 +276,10 @@ async def lifespan(app: FastAPI): WhisperProcessor.get_instance(); QwenLLMProces
 app = FastAPI(title="TalkMateAI Unified GPU Mandarin Server", version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok"}
+
 @app.get("/avatars")
 async def list_avatars(): return {"current_avatar_id": avatar_mgr.current_avatar_id, "avatars": avatar_mgr.list_avatars()}
 
