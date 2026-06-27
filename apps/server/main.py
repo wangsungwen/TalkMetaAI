@@ -1,9 +1,6 @@
 import asyncio
 import json
 import base64
-import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 import numpy as np
 import logging
 import sys
@@ -22,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 CLIENT_OUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../client/out"))
+LIGHTWEIGHT_MODE = os.getenv("TALKMETA_LIGHTWEIGHT", "0").lower() in {"1", "true", "yes", "on"}
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
@@ -78,6 +76,9 @@ class WhisperProcessor:
         if cls._instance is None: cls._instance = cls()
         return cls._instance
     def __init__(self):
+        import torch
+        from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
         self.device = "cpu"
         self.torch_dtype = torch.float32
         model_id = "openai/whisper-tiny"
@@ -118,11 +119,15 @@ class QwenLLMProcessor:
         if cls._instance is None: cls._instance = cls()
         return cls._instance
     def __init__(self):
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
+
         self.device = "cpu"
         self.torch_dtype = torch.float32
         model_id = "Qwen/Qwen2.5-1.5B-Instruct"
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True).to(self.device)
+        self.streamer_class = TextIteratorStreamer
         self.message_history = []
         self.max_history_messages = 6
         self.last_image_desc = None
@@ -150,7 +155,7 @@ class QwenLLMProcessor:
             inputs = self.tokenizer([prompt], return_tensors="pt")
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
-            streamer = TextIteratorStreamer(self.tokenizer, skip_queue=True, skip_special_tokens=True)
+            streamer = self.streamer_class(self.tokenizer, skip_queue=True, skip_special_tokens=True)
             generation_kwargs = dict(**inputs, do_sample=True, temperature=0.7, top_p=0.9, repetition_penalty=1.2, max_new_tokens=150, streamer=streamer)
             Thread(target=self.model.generate, kwargs=generation_kwargs).start()
 
@@ -271,14 +276,21 @@ manager = ConnectionManager()
 avatar_mgr = AvatarManager()
 
 @asynccontextmanager
-async def lifespan(app: FastAPI): WhisperProcessor.get_instance(); QwenLLMProcessor.get_instance(); KokoroTTSProcessor.get_instance(); yield
+async def lifespan(app: FastAPI):
+    if LIGHTWEIGHT_MODE:
+        logger.info("TalkMetaAI lightweight mode enabled; skipping AI model preload.")
+    else:
+        WhisperProcessor.get_instance()
+        QwenLLMProcessor.get_instance()
+        KokoroTTSProcessor.get_instance()
+    yield
 
 app = FastAPI(title="TalkMateAI Unified GPU Mandarin Server", version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/healthz")
 async def healthz():
-    return {"status": "ok"}
+    return {"status": "ok", "lightweight": LIGHTWEIGHT_MODE}
 
 @app.get("/avatars")
 async def list_avatars(): return {"current_avatar_id": avatar_mgr.current_avatar_id, "avatars": avatar_mgr.list_avatars()}
@@ -286,6 +298,62 @@ async def list_avatars(): return {"current_avatar_id": avatar_mgr.current_avatar
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket, client_id)
+
+    if LIGHTWEIGHT_MODE:
+        try:
+            await websocket.send_text(json.dumps({
+                "status": "connected",
+                "client_id": client_id,
+                "current_avatar": avatar_mgr.get_current_avatar(),
+                "lightweight": True
+            }))
+            await websocket.send_text(json.dumps({
+                "type": "status",
+                "message": "TalkMetaAI is running in lightweight mode on Render Free. AI voice models are disabled to stay within 512MB RAM."
+            }))
+
+            while True:
+                try:
+                    raw_data = await websocket.receive()
+                except Exception:
+                    break
+
+                if "bytes" in raw_data and raw_data["bytes"] is not None:
+                    await websocket.send_text(json.dumps({
+                        "type": "status",
+                        "message": "Lightweight mode received audio, but STT/LLM/TTS models are disabled on the Free instance."
+                    }))
+                    await websocket.send_text(json.dumps({"audio_complete": True}))
+                    continue
+
+                if "text" in raw_data:
+                    try:
+                        message = json.loads(raw_data["text"])
+                        if "audio_segment" in message:
+                            await websocket.send_text(json.dumps({
+                                "type": "status",
+                                "message": "Lightweight mode received audio, but STT/LLM/TTS models are disabled on the Free instance."
+                            }))
+                            await websocket.send_text(json.dumps({"audio_complete": True}))
+                        elif message.get("type") == "image_update":
+                            await websocket.send_text(json.dumps({
+                                "type": "status",
+                                "message": "Lightweight mode received an image update."
+                            }))
+                        elif message.get("type") == "switch_avatar":
+                            req_id = message.get("avatarId")
+                            if req_id and avatar_mgr.switch_avatar(req_id):
+                                await websocket.send_text(json.dumps({
+                                    "type": "status",
+                                    "message": "Avatar switched.",
+                                    "current_avatar": avatar_mgr.get_current_avatar()
+                                }))
+                    except Exception:
+                        pass
+        finally:
+            manager.disconnect(client_id)
+        return
+
     whisper_processor = WhisperProcessor.get_instance()
     qwen_processor = QwenLLMProcessor.get_instance()
     tts_processor = KokoroTTSProcessor.get_instance()

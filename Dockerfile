@@ -17,6 +17,7 @@ FROM python:3.10-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     NEXT_TELEMETRY_DISABLED=1 \
+    TALKMETA_LIGHTWEIGHT=1 \
     HF_HOME=/opt/render/project/.cache/huggingface
 
 WORKDIR /app
