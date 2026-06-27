@@ -130,6 +130,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 ### 步驟：
 1. 下載並解壓 [ngrok](https://ngrok.com/)。
+
    選項 1：通過 WinGet 安裝（推薦）
    ```powershell
    winget install ngrok.ngrok
