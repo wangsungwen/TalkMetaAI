@@ -17,8 +17,8 @@ FROM python:3.10-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     NEXT_TELEMETRY_DISABLED=1 \
-    TALKMETA_LIGHTWEIGHT=1 \
-    HF_HOME=/opt/render/project/.cache/huggingface
+    TALKMETA_LIGHTWEIGHT=auto \
+    HF_HOME=/app/.cache/huggingface
 
 WORKDIR /app
 
@@ -58,6 +58,6 @@ RUN pip install --upgrade pip \
         websockets \
         wheel
 
-EXPOSE 8000
+EXPOSE 7860
 
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"

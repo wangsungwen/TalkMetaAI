@@ -1,3 +1,14 @@
+---
+title: TalkMetaAI
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # 🎭 TalkMateAI 地端多模態 AI 伴侶
 
 **基於地端（Local Host）運行的 3D 虛擬伴侶，提供 100% 隱私保護、零頻寬成本、毫秒級流暢對答與實時相機視覺辨識。**

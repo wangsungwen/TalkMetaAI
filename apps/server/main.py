@@ -1,7 +1,6 @@
 import asyncio
 import json
 import base64
-import numpy as np
 import logging
 import sys
 import os
@@ -19,7 +18,19 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 CLIENT_OUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../client/out"))
-LIGHTWEIGHT_MODE = os.getenv("TALKMETA_LIGHTWEIGHT", "0").lower() in {"1", "true", "yes", "on"}
+
+def is_lightweight_mode() -> bool:
+    value = os.getenv("TALKMETA_LIGHTWEIGHT", "0").lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    if value == "auto":
+        is_hugging_face_space = any(os.getenv(name) for name in ("SPACE_ID", "SPACE_AUTHOR_NAME", "SPACE_REPO_NAME"))
+        return not is_hugging_face_space
+    return False
+
+LIGHTWEIGHT_MODE = is_lightweight_mode()
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
@@ -88,6 +99,8 @@ class WhisperProcessor:
     
     async def transcribe_audio(self, audio_bytes):
         try:
+            import numpy as np
+
             audio_array = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
             logger.info(f"🎤 [STT 偵測] 成功收到前端音訊數據！長度: {len(audio_array)} 採樣點")
             
@@ -198,6 +211,8 @@ class KokoroTTSProcessor:
 
     # 💡 修正點：將方法縮排完美移入 KokoroTTSProcessor 類別中！
     async def synthesize_speech_with_protection(self, text: str, is_initial: bool = True):
+        import numpy as np
+
         if not text or not self.pipeline: return None, []
         
         if len(text) <= 3:
@@ -357,6 +372,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     whisper_processor = WhisperProcessor.get_instance()
     qwen_processor = QwenLLMProcessor.get_instance()
     tts_processor = KokoroTTSProcessor.get_instance()
+    import numpy as np
 
     try:
         await websocket.send_text(json.dumps({
