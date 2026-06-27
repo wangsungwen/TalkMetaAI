@@ -129,13 +129,14 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 由於行動裝置瀏覽器（Safari/Chrome）會封鎖非安全網域（HTTP）的麥克風及鏡頭存取，必須使用 ngrok 進行 HTTPS 傳輸。
 
 ### 步驟：
-1. 下載並解壓 [ngrok](https://ngrok.com/)。
+1. 在電腦上安裝 ngrok 軟體：
+   選項 1：下載並解壓 [ngrok](https://ngrok.com/)。
 
-   選項 1：通過 WinGet 安裝（推薦）
+   選項 2：通過 WinGet 安裝（推薦）
    ```powershell
    winget install ngrok.ngrok
    ```
-   選項 2：通過 PowerShell 腳本手動安裝
+   選項 3：通過 PowerShell 腳本手動安裝
    ```powershell
    # 1. Download the official stable zip file
    Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -  OutFile "ngrok.zip"
@@ -153,12 +154,13 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
    ```powershell
    ./ngrok config add-authtoken <YOUR_AUTHTOKEN>
    ```
+   註：以選項3 安裝 ngrok 後，指令前不必輸入 "./"
 4. 對 Port 8000 進行公網穿透：
    ```powershell
    ./ngrok http 8000
    ```
 5. 掃描或輸入 ngrok 產生的 `https://xxxx.ngrok-free.app` 專屬網址即可連線，自動取得相機與麥克風權限！
-
+   Ps: 請勿將網址透過張貼至 line 訊息來點選連線，無法取得麥克風與鏡頭權限
 ---
 
 ## 🎮 角色切換指南 (Avatar Selector)
