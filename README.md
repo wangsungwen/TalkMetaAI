@@ -80,7 +80,31 @@ cd TalkMetaAI
 git init
 ```
 
-### 3. 一鍵安裝與自動部署
+### 3. 新電腦的環境配置
+- 🛠️ 步驟 1：解除前端 pnpm 的建置指令封鎖
+  直接在當前目錄授權 pnpm 執行相依套件的建置腳本，讓前端能順利打包：
+  ```powershell
+  # 允許這些必要的原生套件執行建置腳本
+  pnpm approve-builds
+  ```
+- 🛠️ 步驟 2：手動初始化後端虛擬環境
+  回到後端目錄，使用 uv 建立全新的虛擬環境，並補齊核心主機套件（Uvicorn）：
+  ```powershell
+  # 1. 切換到後端伺服器目錄
+  cd apps/server
+
+  # 2. 建立 Python 虛擬環境
+  uv venv
+
+  # 3. 啟用該環境並手動裝回一體化主機必備的 uvicorn 
+  .venv\Scripts\activate
+  uv pip install uvicorn fastapi pillow torch transformers websockets numpy kokoro
+
+  # 4. 退回 TalkMetaAI 根目錄
+  cd ../..
+  ```
+
+### 4. 一鍵安裝與自動部署
 我們為您準備了整合前端打包、後端依賴補齊與自動服務啟動的自動化 PowerShell 腳本。
 
 請以 **系統管理員權限** 開啟 PowerShell 視窗，並於專案根目錄下執行：
