@@ -332,13 +332,15 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                         
                         logger.info("🚀 [網絡發送] 成功！正在向手機端推送語音與動作時間戳...")
                         await websocket.send_text(json.dumps({
+                            "type": "audio_response", # 🎯 確保對齊前端的事件監聽 Type
                             "audio": base64_audio, 
-                            "word_timings": initial_timings, 
+                            "text": clean_initial_text,
+                            "word_timings": initial_timings,
+                            "visemes": [[t["start_time"], t["word"]] for t in initial_timings if "start_time" in t], # 🎯 強制轉為二維嘴型時間序列
                             "sample_rate": 24000, 
-                            "method": "native_kokoro_timing", 
-                            "modality": "audio_only"
+                            "method": "native_kokoro_timing"
                         }))
-                        
+                                                
                         if initial_collection_stopped_early:
                             collected_chunks = []
                             try:
@@ -353,12 +355,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                                             if chunk_audio is not None and len(chunk_audio) > 2:
                                                 base64_chunk = base64.b64encode((chunk_audio * 32767).astype(np.int16).tobytes()).decode("utf-8")
                                                 await websocket.send_text(json.dumps({
+                                                    "type": "audio_response",
                                                     "audio": base64_chunk, 
-                                                    "word_timings": chunk_timings, 
+                                                    "text": clean_chunk,
+                                                    "word_timings": chunk_timings,
+                                                    "visemes": [[t["start_time"], t["word"]] for t in chunk_timings if "start_time" in t], # 🎯 讓後續說話也能持續動嘴
                                                     "sample_rate": 24000, 
-                                                    "method": "native_kokoro_timing", 
-                                                    "chunk": True, 
-                                                    "modality": "audio_only"
+                                                    "method": "native_kokoro_timing",
+                                                    "chunk": True
                                                 }))
                                     except StopAsyncIteration: 
                                         break
