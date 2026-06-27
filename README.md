@@ -15,6 +15,244 @@ license: mit
 
 > 本專案為實戰導向的地端 AI 教學手冊配套完整程式碼，特別針對 Windows 部署、CORS 網路障礙、Windows 語系編碼以及最新世代顯示卡硬體架構（如 NVIDIA RTX 5090 Blackwell）提供完備的「全線 CPU 穩定相容防禦模式」與「GPU 滿血加速版」。
 
+## 🎭 TalkMateAI 雲端多模態 AI 伴侶
+
+TalkMateAI 也可以部署成 Hugging Face Docker Space，讓手機、平板與不同網路環境的瀏覽器直接透過 HTTPS 使用，不需要自行架設 ngrok、反向代理或公網 IP。雲端版本會將 Next.js 前端靜態輸出與 FastAPI 後端整合在同一個 Docker 容器中，並由 Hugging Face Space 對外提供 `https://<space-name>.hf.space/` 網址。
+
+雲端部署適合：
+
+- 想用手機直接測試相機、麥克風與 WebSocket 互動。
+- 想把 TalkMateAI 分享給其他裝置或朋友試用。
+- 不想處理本機 HTTPS、CORS、公網穿透與防火牆設定。
+- 希望用 Hugging Face 的 CPU/GPU Space 快速驗證 AI 伴侶原型。
+
+目前建議部署方式：
+
+- GitHub Repo: `https://github.com/wangsungwen/TalkMetaAI`
+- Hugging Face Space: `https://huggingface.co/spaces/wangsongwen/TalkmetaAI`
+- Space SDK: `Docker`
+- App Port: `7860`
+- 建議硬體: `CPU Basic` 可啟動完整服務；若要更好的推理速度，建議升級 GPU Space。
+
+---
+
+## ☁️ 從 GitHub 安裝至 Hugging Face Space
+
+以下流程適合從零開始，把 GitHub Repo 部署到 Hugging Face Space 雲端。
+
+### 1. 建立 Hugging Face Space
+
+1. 前往 [Create a new Space](https://huggingface.co/new-space)。
+2. Owner 選擇你的 Hugging Face 帳號，例如 `wangsongwen`。
+3. Space name 填入 `TalkmetaAI`。
+4. SDK 選擇 `Docker`。
+5. Hardware 先選 `CPU Basic`；需要更快回應速度時再升級 GPU。
+6. 建立 Space 後，確認 Space URL 類似：
+
+```text
+https://huggingface.co/spaces/wangsongwen/TalkmetaAI
+```
+
+### 2. 確認 README Space 設定
+
+Hugging Face Space 會讀取 README 開頭的 YAML metadata。本專案根目錄 `README.md` 開頭應包含：
+
+```yaml
+---
+title: TalkMetaAI
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+```
+
+其中最重要的是：
+
+```yaml
+sdk: docker
+app_port: 7860
+```
+
+### 3. 確認 Dockerfile 啟動設定
+
+根目錄必須有 `Dockerfile`，且最後啟動 FastAPI 時必須監聽 `0.0.0.0` 與 Hugging Face 指定的 port：
+
+```dockerfile
+EXPOSE 7860
+
+CMD sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"
+```
+
+### 4. 補齊 Kokoro 中文語音依賴
+
+如果雲端 log 出現：
+
+```text
+ModuleNotFoundError: No module named 'ordered_set'
+```
+
+代表 Kokoro 中文管線缺少 `misaki.zh` 需要的中文分詞與拼音依賴。請確認 `Dockerfile` 的 `pip install` 區塊包含：
+
+```dockerfile
+        "cn2an" \
+        "g2pM" \
+        "jieba" \
+        kokoro \
+        numpy \
+        "ordered-set" \
+        packaging \
+        pypinyin \
+```
+
+同時確認 `apps/server/pyproject.toml` 的 `dependencies` 包含：
+
+```toml
+    "kokoro",
+    "jieba",
+    "g2pM",
+    "ordered-set",
+    "pypinyin",
+    "cn2an",
+```
+
+注意：PyPI 套件名稱是 `ordered-set`，但 Python import 名稱是 `ordered_set`。
+
+更新 lockfile：
+
+```powershell
+cd apps/server
+uv lock
+cd ../..
+```
+
+可用以下指令做最小依賴驗證：
+
+```powershell
+uvx --python 3.10 --with ordered-set --with jieba --with g2pM --with pypinyin --with cn2an --with numpy python -c "import ordered_set, jieba, g2pM, pypinyin, cn2an; print('zh deps ok')"
+```
+
+成功時會看到：
+
+```text
+zh deps ok
+```
+
+### 5. Push 到 GitHub
+
+在專案根目錄執行：
+
+```powershell
+git status --short
+git add Dockerfile apps/server/pyproject.toml apps/server/uv.lock README.md
+git commit -m "Document Hugging Face Space deployment"
+git push origin main
+```
+
+若首次 commit 時 Git 要求設定身分：
+
+```powershell
+git config user.name "wangsungwen"
+git config user.email "wangsungwen@users.noreply.github.com"
+```
+
+### 6. 將 GitHub Repo 同步到 Hugging Face Space
+
+如果 Space 是從 GitHub 匯入並已啟用同步，push 到 GitHub 後 Hugging Face 會自動 rebuild。
+
+如果 Hugging Face Space 是獨立 repo，請加上 HF remote：
+
+```powershell
+git remote add hf https://huggingface.co/spaces/wangsongwen/TalkmetaAI
+git push hf main:main
+```
+
+若 Windows git 認證卡住，可改用 Hugging Face SDK 直接提交關鍵檔案：
+
+```powershell
+python -c "from pathlib import Path; from huggingface_hub import HfApi, CommitOperationAdd; root=Path.cwd(); repo_id='wangsongwen/TalkmetaAI'; paths=['Dockerfile','apps/server/pyproject.toml','apps/server/uv.lock','README.md']; ops=[CommitOperationAdd(path_in_repo=p, path_or_fileobj=str(root / p)) for p in paths]; print(HfApi().create_commit(repo_id=repo_id, repo_type='space', operations=ops, commit_message='Update Hugging Face deployment docs and dependencies'))"
+```
+
+### 7. 執行 Factory Rebuild
+
+修改 Dockerfile 或 Python 依賴後，建議執行 Factory rebuild，避免 Hugging Face 沿用舊快取：
+
+```powershell
+python -c "from huggingface_hub import HfApi; print(HfApi().restart_space(repo_id='wangsongwen/TalkmetaAI', factory_reboot=True))"
+```
+
+Space 狀態通常會依序變成：
+
+```text
+RUNNING_BUILDING
+RUNNING_APP_STARTING
+RUNNING
+```
+
+### 8. 檢查部署狀態
+
+查看 Space 狀態：
+
+```powershell
+hf spaces info wangsongwen/TalkmetaAI
+```
+
+查看 runtime log：
+
+```powershell
+hf spaces logs wangsongwen/TalkmetaAI --tail 200
+```
+
+查看 build log：
+
+```powershell
+hf spaces logs wangsongwen/TalkmetaAI --build --tail 120
+```
+
+Windows PowerShell 若遇到 CP950 編碼錯誤，可先切 UTF-8：
+
+```powershell
+chcp 65001
+$env:PYTHONIOENCODING="utf-8"
+```
+
+### 9. 驗證雲端網址
+
+開啟：
+
+```text
+https://wangsongwen-talkmetaai.hf.space/
+```
+
+或用 PowerShell 檢查 HTTP status：
+
+```powershell
+(Invoke-WebRequest -Uri "https://wangsongwen-talkmetaai.hf.space/" -UseBasicParsing -TimeoutSec 30).StatusCode
+```
+
+成功應回：
+
+```text
+200
+```
+
+Runtime log 應看到：
+
+```text
+Application startup complete.
+Uvicorn running on http://0.0.0.0:7860
+WebSocket /ws/test-client [accepted]
+```
+
+且不應再出現：
+
+```text
+ModuleNotFoundError: No module named 'ordered_set'
+```
+
 [![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-15+-black.svg)](https://nextjs.org)
