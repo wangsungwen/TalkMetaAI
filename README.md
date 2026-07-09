@@ -98,6 +98,8 @@ git init
   直接在當前目錄授權 pnpm 執行相依套件的建置腳本，讓前端能順利打包：
   ```powershell
   # 允許這些必要的原生套件執行建置腳本
+  pnpm run monorepo-setup
+  pnpm format
   pnpm approve-builds
   ```
 - 🛠️ 步驟 2：手動初始化後端虛擬環境
